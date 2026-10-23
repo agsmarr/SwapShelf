@@ -107,7 +107,11 @@ def sign_in(request):
 def profile(request):
     form = ProfileForm(request.POST or None, instance=request.user)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        #Patched vulnerability
+        new_user = form.save(commit=False)
+        if not request.user.is_superuser:
+            new_user.is_staff = False
+        new_user.save()
         return redirect("profile")
     return render(request, "market/profile.html", {"form": form})
 
